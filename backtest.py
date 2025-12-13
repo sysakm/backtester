@@ -27,9 +27,10 @@ def backtester(price_df, signal_df, spread=0, spread_is_relative=True):
     merged_df['trade'] = merged_df['position'].diff(1).fillna(0)
     # When analyzing return/equity values use positions that created those returns, thus the ones from the prev. bar
     merged_df['r_position'] = merged_df['position'].shift(1).fillna(0)
-    
     merged_df['return'] = (merged_df['r_position'] * merged_df['price'].pct_change()).fillna(0)
+    # Unlike mark-to-market returns, spread costs are calculated base on current bar position update
     merged_df['spread_return'] = np.abs(merged_df['trade']) * merged_df['quoted_spread'] / 2
+
     merged_df['net_return'] = merged_df['return'] - merged_df['spread_return']
     merged_df['equity'] = (1 + merged_df['net_return']).cumprod()
     
