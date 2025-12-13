@@ -15,8 +15,8 @@ def generate_random_prices(rng, n_bars, base_price=1.0, return_loc=0, return_sca
     return pd.DataFrame({'t': times, 'price': prices})
 
 
-def generate_random_spreads(rng, n_bars, base_spread=0.0002, loc=0, scale=2):
-    spreads = base_spread * np.exp(rng.normal(loc=loc, scale=scale, size=n_bars))
+def generate_random_spreads(rng, n_bars, base_spread=0.0002, scale=2):
+    spreads = base_spread * np.exp(rng.normal(loc=0, scale=scale, size=n_bars))
     # TODO: add arguments for time range adjustment
     times = generate_time_range(n_bars)
     return pd.DataFrame({'t': times, 'quoted_spread': spreads})
