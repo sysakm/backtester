@@ -30,16 +30,16 @@ def generate_random_signal(rng, n_bars, side_probs=0.1):
     return pd.DataFrame({'t': times, 'signal': signals})
 
 
-def draw_results(return_df, price_df):
-    fig, ax = plt.subplots(figsize=(14, 6))
+def draw_results(ax, ax2, return_df, price_df, fig_title=None):
     ax.plot(return_df['t'], return_df['equity'])
     ymin, ymax = ax.get_ylim()
     ax.fill_between(return_df['t'], ymin, ymax, where=(return_df['r_position'] > 0), color='green', alpha=0.15)
     ax.fill_between(return_df['t'], ymin, ymax, where=(return_df['r_position'] < 0), color='red', alpha=0.15)
     ax.set_ylim(ymin, ymax)
     ax.set_ylabel('Equity')
+    if fig_title is not None:
+        ax.set_title(fig_title)
     
-    ax2 = ax.twinx()
     ax2.plot(price_df['t'], price_df['price'], c='black', alpha=0.3)
     ax2.set_ylabel('Price')
-    return fig, ax, ax2
+    return ax, ax2
