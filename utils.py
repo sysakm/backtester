@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 
 
-def generate_time_range(n_bars, start='2025-01-01 06:00:00', freq='min'):
+def generate_time_range(n_bars, t_start='2025-01-01 06:00:00', t_freq='min'):
     """Wrapper function for pd.date_range with consistent argument names"""
-    return pd.date_range(periods=n_bars, start=start, freq=freq)
+    return pd.date_range(periods=n_bars, start=t_start, freq=t_freq)
 
 
 def generate_random_prices(
@@ -14,11 +14,14 @@ def generate_random_prices(
     """
     Generate synthetic price data with normally distributed returns.
     Prices are generated as p_0 = base_price, p_{t+1} = p_t * (1 + r_{t+1}),
-    r_1, ..., r_n ~ N(return_loc, return_scale).
+    r_1, ..., r_n ~ N(return_loc, return_scale). 
+    r_t values are clipped to [-0.999, +infinity).
     Returns: DataFrame ('t', 'price')
     """
     returns = rng.normal(size=n_bars, loc=return_loc, scale=return_scale)
-    prices = base_price * np.cumprod(returns + 1)  # assumes returns > -1
+    returns = np.clip(returns, -0.999, None)
+
+    prices = base_price * np.cumprod(returns + 1)
     times = generate_time_range(n_bars, t_start, t_freq)
     return pd.DataFrame({'t': times, 'price': prices})
 
@@ -45,7 +48,12 @@ def generate_random_signal(rng, n_bars, side_probs=0.1, t_start='2025-01-01 06:0
     In both cases P(0) = 1 - P(-1) - P(1).
     Returns: DataFrame ('t', 'signal')
     """
-    p_neg, p_pos = side_probs if np.ndim(side_probs) > 0 else (side_probs, side_probs)
+    if isinstance(side_probs, (tuple, list, np.ndarray)):
+        p_neg, p_pos = side_probs
+    else:
+        p_neg = p_pos = side_probs
+    assert 0 <= p_neg + p_pos <= 1, "Invalid signal probabilities"
+
     signals = rng.choice([-1, 0, 1], p=[p_neg, 1-p_neg-p_pos, p_pos], size=n_bars)
     times = generate_time_range(n_bars, t_start, t_freq)
     return pd.DataFrame({'t': times, 'signal': signals})
