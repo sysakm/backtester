@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def generate_time_range(n_bars, t_start='2025-01-01 06:00:00', t_freq='min'):
-    """Wrapper function for pd.date_range with consistent argument names"""
+    """Wrapper function for pd.date_range with consistent argument names."""
     return pd.date_range(periods=n_bars, start=t_start, freq=t_freq)
 
 
@@ -44,12 +44,12 @@ def generate_random_signal(rng, n_bars, side_probs=0.1, t_start='2025-01-01 06:0
     """
     Generate synthetic signal example with each value from {-1, 0, 1}.
     If side_probs is float, P(-1) = P(1) = side_probs.
-    If side_probs is 2-tuple, P(-1) = side_probs[0], P(1) = side_probs[1].
+    If side_probs is an iterable, P(-1) = side_probs[0], P(1) = side_probs[1], additional elements are ignored.
     In both cases P(0) = 1 - P(-1) - P(1).
     Returns: DataFrame ('t', 'signal')
     """
     if isinstance(side_probs, (tuple, list, np.ndarray)):
-        p_neg, p_pos = side_probs
+        p_neg, p_pos, *_ = side_probs
     else:
         p_neg = p_pos = side_probs
     assert 0 <= p_neg + p_pos <= 1, "Invalid signal probabilities"
