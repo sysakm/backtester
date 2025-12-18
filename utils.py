@@ -59,6 +59,30 @@ def generate_random_signal(rng, n_bars, side_probs=0.1, t_start='2025-01-01 06:0
     return pd.DataFrame({'t': times, 'signal': signals})
 
 
+def load_example_data(symbol='aapl.us', start_date='20210101', end_date='20250101', cache_dir='data'):
+    """
+    Download historical daily price data from stooq.pl and cache it locally.
+    Stooq is a free public market data provider which does not require authentication.
+    The dates are expected to be of format 'YYYYMMDD'.
+    Returned prices correspond to daily closing prices.
+    Returns: DataFrame ('t', 'price')
+    """
+    pathlib.Path(cache_dir).mkdir(exist_ok=True)
+    data_path = f'{cache_dir}/{symbol}_{start_date}_{end_date}.csv'
+    if pathlib.Path(data_path).exists():
+        return pd.read_csv(data_path, parse_dates=['t'])
+
+    url = f'https://stooq.pl/q/d/l/?s={symbol}&i=d&f={start_date}&t={end_date}'
+    df = pd.read_csv(url, parse_dates=['Data'])
+    if df.empty or 'Data' not in df.columns:
+        raise ValueError(f'Failed to download data for symbol={symbol} in range {start_date}-{end_date}.')
+    # Stooq returns column names in Polish. Only the closing price is retained.
+    df = df.drop(['Otwarcie', 'Najwyzszy', 'Najnizszy', 'Wolumen'], axis=1).rename({'Data': 't', 'Zamkniecie': 'price'}, axis=1)
+    df = df.sort_values('t').reset_index(drop=True)
+    df.to_csv(data_path, index=False)
+    return df
+
+
 def draw_results(ax, ax2, return_df, price_df, fig_title=None):
     """
     Draw equity curve and shade position sides into ax based on return_df.
