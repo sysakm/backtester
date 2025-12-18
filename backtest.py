@@ -79,7 +79,10 @@ def build_trade_pairs(return_df):
 def assert_pnl_invariant(return_df, trade_df):
     """
     Asserts bar-based and trade-based net PnL calculations give the same value.
-    PnL is computed in price (currency) units, not percentage returns.
+
+    Note:
+    This function computes PnL in price (currency) units, not percentage returns, for internal consistency check.
+    The computation is not used for reporting strategy performance, which is evaluated using percentage-based PnL.
     """
     raw_pnl = (return_df['price'].diff(1) * return_df['r_position']).iloc[1:].sum()
     spread_pnl = (return_df['trade'].abs() * return_df['price'] * return_df['quoted_spread'] / 2).sum()
