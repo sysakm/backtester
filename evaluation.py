@@ -54,6 +54,37 @@ def winrate(trade_df):
     return np.mean(pl > 0)
 
 
+# --- Statistics report ---
+def generate_stats_report(return_df, trade_df, an_factor=252, bar_length='1d'):
+    """Calculate return-based and trade-based statistics and combine them into one dict instance."""
+    results = {}
+
+    results['Annualized Sharpe ratio'] = sharpe_ratio(return_df, an_factor)
+    results['Maximum drawdown magnitude, equity units'] = max_drawdown_magn(return_df)
+    results['Maximum drawdown duration, bars'] = max_drawdown_duration(return_df)
+
+    results['Number of trade pairs'] = number_of_trade_pairs(trade_df)
+    results['Average position holding period, bars'] = average_trade_pair_duration(trade_df, bar_length)
+    results['Win rate (%)'] = np.round(winrate(trade_df), 3) * 100
+    return results
+
+
+def format_stats_for_display(stats_dct):
+    """Convert float statistics into formatted string values."""
+    format_dct = {
+        'Annualized Sharpe ratio': '{:.3f}',
+        'Maximum drawdown magnitude, equity units': '{:.3f}',
+        'Maximum drawdown duration, bars': '{:.0f}',
+        'Number of trade pairs': '{:.0f}',
+        'Average position holding period, bars': '{:.1f}',
+        'Win rate (%)': '{:.0f}',
+    }
+    ret_dct = {}
+    for stat in stats_dct:
+        ret_dct[stat] = format_dct.get(stat, '{:.3f}').format(stats_dct[stat])
+    return ret_dct
+
+
 # --- Validation ---
 def assert_pnl_invariant(return_df, trade_df):
     """
