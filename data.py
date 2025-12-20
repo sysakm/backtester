@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pathlib
@@ -82,21 +81,3 @@ def load_example_data(symbol='aapl.us', start_date='20210101', end_date='2025010
     df = df.sort_values('t').reset_index(drop=True)
     df.to_csv(data_path, index=False)
     return df
-
-
-def draw_results(ax, ax2, return_df, price_df, fig_title=None):
-    """
-    Draw equity curve and shade position sides into ax based on return_df.
-    Draw background price curve into ax2 based on price_df.
-    """
-    ax.plot(return_df['t'], return_df['equity'])
-    ymin, ymax = ax.get_ylim()
-    ax.fill_between(return_df['t'], ymin, ymax, where=(return_df['r_position'] > 0), color='green', alpha=0.15)
-    ax.fill_between(return_df['t'], ymin, ymax, where=(return_df['r_position'] < 0), color='red', alpha=0.15)
-    ax.set_ylim(ymin, ymax)
-    ax.set_ylabel('Equity')
-    if fig_title is not None:
-        ax.set_title(fig_title)
-    
-    ax2.plot(price_df['t'], price_df['price'], c='black', alpha=0.3)
-    ax2.set_ylabel('Price')

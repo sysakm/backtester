@@ -74,30 +74,3 @@ def build_trade_pairs(return_df):
     closing_trade_df = trade_df[1::2].drop('trade', axis=1).rename({'t': 'close_t', 'price': 'close_price'}, axis=1).reset_index(drop=True)
     trade_df = pd.concat([opening_trade_df, closing_trade_df], axis=1)
     return trade_df
-
-
-def assert_pnl_invariant(return_df, trade_df):
-    """
-    Asserts bar-based and trade-based net PnL calculations give the same value.
-
-    Note:
-    This function computes PnL in price (currency) units, not percentage returns, for internal consistency check.
-    The computation is not used for reporting strategy performance, which is evaluated using percentage-based PnL.
-    """
-    raw_pnl = (return_df['price'].diff(1) * return_df['r_position']).iloc[1:].sum()
-    spread_pnl = (return_df['trade'].abs() * return_df['price'] * return_df['quoted_spread'] / 2).sum()
-    pnl1 = raw_pnl - spread_pnl
-
-    if trade_df.empty:  # if signal is constantly zero
-        pnl2 = 0.0
-    else:
-        realized_pnl = ((trade_df['close_price'] - trade_df['open_price']) * trade_df['open_pos_change']).dropna().sum()
-        pnl2 = realized_pnl
-
-        last_price = return_df.iloc[-1]['price']  # mark the remaining open position to market
-        last_trade = trade_df.iloc[-1]
-        if pd.isna(last_trade['close_t']):
-            pnl2 += last_trade['open_pos_change'] * (last_price - last_trade['open_price'])
-
-    assert np.isclose(pnl1, pnl2), f'PnL mismatch, pnl1={pnl1}, pnl2={pnl2}'
-    
