@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-# --- Return-based metrics ---
+# --- Return-based statistics ---
 def sharpe_ratio(return_df, an_factor=252):
     """Calculate Sharpe Ratio annualized by `an_factor`. Assumes per-bar arithmetic returns."""
     mu = return_df['net_return'].mean()
@@ -31,7 +31,7 @@ def max_drawdown_duration(return_df):
     return np.max(diff_index[1::2] - diff_index[::2])
 
 
-# --- Trade-based metrics ---
+# --- Trade-based statistics ---
 def number_of_trade_pairs(trade_df):
     """Calculate number of trade pairs, excluding the last open trade if there is one."""
     return len(trade_df.dropna())

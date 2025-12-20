@@ -1,21 +1,53 @@
 # Scalar Signal Backtester (Single-Asset, Fixed-Size)
 
-Models strategies trading a single asset with fixed position size.
-Takes a scalar signal as an input, opens long positions when positive signal value is encountered, and, if shorts are allowed, opens short positions on negative signal.
-Any open position is held unchanged until the signal switches sign.
-PnL for open positions is marked to market on bar close.
+Minimal vectorized backtester for single-asset strategies with a fixed position size, driven by an exogenous scalar trading signal.
+Intended for educational use, experimentation, and as a minimal reference implementation.
 
-Any signal is assumed to be generated externally.
-Resulting trades are executed on the first bar _strictly after_ the signal timestamp.
-With daily data, this corresponds to next-day closing price execution.
-This approach is used as a simplified, reproducible execution model.
-In-bar microstructure is ignored, trades are executed at closing prices with spread costs deducted at execution.
+## Overview
 
-Two demonstration notebooks are provided.
-The first notebook ('backtester_settings_demo.ipynb') works with synthetic price data and demonstrates the available backtesting settings: spread assumptions and whether the strategy is long-only or allows short positions.
-Synthetical data is generated randomly with fixed seeding for experiment reproducibility.
+- Trades a single asset with position size in {−1, 0, 1}.
+- Opens long position on positive signal.
+- Opens short position on negative signal if shorts are enabled.
+- Positions are held until the signal switches sign.
+- Open positions are marked to market on bar close.
 
-The second notebook (not committed yet) provides an example using real market data.
-It evaluates a simple trading signal on historical prices and provides the resulting statistics as a demonstration of backtester functionality.
-Historical data is downloaded from Stooq (stooq.pl), a public market data mirror that provides free, unauthenticated CSV access.
-Data acquired from this source is used for illustrative purposes only and was chosen for being reproducible and quick to set up without requiring API keys.
+## Execution Model
+
+- Signals are assumed to be generated externally.
+- Trades are executed on the first bar **strictly after** the signal timestamp.
+- With daily data, this corresponds to next-day closing price execution.
+- In-bar microstructure is ignored.
+- Trades are executed at closing prices with spread costs applied at execution.
+
+## Scope and Non-Goals
+
+This project is **not** intended to be a full-featured trading system or production-grade backtesting framework.
+The scope of the project is intentionally minimal for reproducibility and readability. 
+
+The following are explicitly out of scope:
+- multi-asset backtesting,
+- variable position sizing,
+- pyramiding or partial position closing,
+- multiple simultaneous positions,
+- intrabar execution or order book modeling.
+
+## Demonstration Notebooks
+
+### 1. Backtester Settings Demo
+`backtester_settings_demo.ipynb`
+
+- Uses synthetic price data.
+- Demonstrates:
+  - different spread assumptions,
+  - long-only vs long–short behavior.
+- Synthetic data is generated with fixed random seeds for reproducibility.
+
+### 2. Real Data Example
+`real_data_example.ipynb`
+
+- Applies a simple trading signal (difference between current price and its moving average) to historical market data (AAPL stock, 2021.01-2024.12).
+- Compares backtesting results for long-only and long-short approaches to execution.
+- Demonstrates resulting equity curves and provides a simple statistics report.
+- Results are shown purely as a demonstration of backtester functionality.
+  
+Historical prices are used for illustrative purposes only and are downloaded from **Stooq** (stooq.pl), a public market data mirror, which provides free and unauthenticated data access.
