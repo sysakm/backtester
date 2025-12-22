@@ -4,6 +4,11 @@ import pandas as pd
 
 
 # --- Return-based statistics ---
+def resulting_equity(return_df):
+    """Extract equity value for the final timestamp."""
+    return return_df.iloc[-1]['equity']
+
+
 def sharpe_ratio(return_df, an_factor=252):
     """Calculate Sharpe Ratio annualized by `an_factor`. Assumes per-bar arithmetic returns."""
     mu = return_df['net_return'].mean()
@@ -37,8 +42,8 @@ def number_of_trades(return_df):
 
 
 # --- Trade-based statistics ---
-def number_of_held_positions(trade_df):
-    """Calculate number of held positions, excluding the last unclosed position if there is one."""
+def number_of_closed_positions(trade_df):
+    """Calculate number of positions held over the course of backtest, excluding the last unclosed position if there is one."""
     return len(trade_df.dropna())
 
 
@@ -46,7 +51,7 @@ def average_trade_pair_duration(trade_df, bar_length='1d'):
     """Calculate average time the position is held, the result is measured in bars."""
     durations = (trade_df['close_t'] - trade_df['open_t']).dropna()
     if durations.empty:
-        return 0
+        return np.nan
     return durations.mean() / pd.Timedelta(bar_length)
 
 
@@ -55,7 +60,7 @@ def winrate(trade_df):
     pl = (trade_df['close_price'] - trade_df['open_price']) * trade_df['open_pos_change']
     pl = pl.dropna()
     if pl.empty:
-        return 0
+        return np.nan
     return np.mean(pl > 0)
 
 
@@ -64,31 +69,33 @@ def generate_stats_report(return_df, trade_df, an_factor=252, bar_length='1d'):
     """Calculate return-based and trade-based statistics and combine them into one dict instance."""
     results = {}
 
+    results['Resulting Equity'] = resulting_equity(return_df)
     results['Annualized Sharpe ratio'] = sharpe_ratio(return_df, an_factor)
     results['Maximum drawdown magnitude, equity units'] = max_drawdown_magn(return_df)
     results['Maximum drawdown duration, bars'] = max_drawdown_duration(return_df)
     results['Number of trades'] = number_of_trades(return_df)
 
-    results['Number of held positions'] = number_of_held_positions(trade_df)
+    results['Number of closed positions'] = number_of_closed_positions(trade_df)
     results['Average position holding period, bars'] = average_trade_pair_duration(trade_df, bar_length)
-    results['Win rate (%)'] = np.round(winrate(trade_df), 3) * 100
+    results['Win rate'] = np.round(winrate(trade_df), 3) * 100
     return results
 
 
 def format_stats_for_display(stats_dct):
     """Convert float statistics into formatted string values."""
     format_dct = {
+        'Resulting Equity, equity units': '{:.3f}',
         'Annualized Sharpe ratio': '{:.3f}',
         'Maximum drawdown magnitude, equity units': '{:.3f}',
         'Maximum drawdown duration, bars': '{:.0f}',
         'Number of trades': '{:.0f}',
-        'Number of held positions': '{:.0f}',
+        'Number of closed positions': '{:.0f}',
         'Average position holding period, bars': '{:.1f}',
-        'Win rate (%)': '{:.0f}',
+        'Win rate': '{:.0f}%',
     }
     ret_dct = {}
-    for stat in stats_dct:
-        ret_dct[stat] = format_dct.get(stat, '{:.3f}').format(stats_dct[stat])
+    for stat, val in stats_dct.items():
+        ret_dct[stat] = 'NaN' if np.isnan(val) else format_dct.get(stat, '{:.3f}').format(val)
     return ret_dct
 
 
