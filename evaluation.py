@@ -31,9 +31,14 @@ def max_drawdown_duration(return_df):
     return np.max(diff_index[1::2] - diff_index[::2])
 
 
+def number_of_trades(return_df):
+    """Calculate number of individual trades."""
+    return np.sum(~np.isclose(return_df['trade'], 0))
+
+
 # --- Trade-based statistics ---
-def number_of_trade_pairs(trade_df):
-    """Calculate number of trade pairs, excluding the last open trade if there is one."""
+def number_of_held_positions(trade_df):
+    """Calculate number of held positions, excluding the last unclosed position if there is one."""
     return len(trade_df.dropna())
 
 
@@ -62,8 +67,9 @@ def generate_stats_report(return_df, trade_df, an_factor=252, bar_length='1d'):
     results['Annualized Sharpe ratio'] = sharpe_ratio(return_df, an_factor)
     results['Maximum drawdown magnitude, equity units'] = max_drawdown_magn(return_df)
     results['Maximum drawdown duration, bars'] = max_drawdown_duration(return_df)
+    results['Number of trades'] = number_of_trades(return_df)
 
-    results['Number of trade pairs'] = number_of_trade_pairs(trade_df)
+    results['Number of held positions'] = number_of_held_positions(trade_df)
     results['Average position holding period, bars'] = average_trade_pair_duration(trade_df, bar_length)
     results['Win rate (%)'] = np.round(winrate(trade_df), 3) * 100
     return results
@@ -75,7 +81,8 @@ def format_stats_for_display(stats_dct):
         'Annualized Sharpe ratio': '{:.3f}',
         'Maximum drawdown magnitude, equity units': '{:.3f}',
         'Maximum drawdown duration, bars': '{:.0f}',
-        'Number of trade pairs': '{:.0f}',
+        'Number of trades': '{:.0f}',
+        'Number of held positions': '{:.0f}',
         'Average position holding period, bars': '{:.1f}',
         'Win rate (%)': '{:.0f}',
     }

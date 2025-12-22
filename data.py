@@ -59,7 +59,7 @@ def generate_random_signal(rng, n_bars, side_probs=0.1, t_start='2025-01-01 06:0
     return pd.DataFrame({'t': times, 'signal': signals})
 
 
-def load_example_data(symbol='aapl.us', start_date='20210101', end_date='20250101', cache_dir='data'):
+def load_hist_data(symbol='aapl.us', start_date='20210101', end_date='20250101', cache_dir='data'):
     """
     Download historical daily price data from stooq.pl and cache it locally.
     Stooq is a free public market data provider which does not require authentication.

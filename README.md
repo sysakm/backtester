@@ -43,7 +43,7 @@ The following are explicitly out of scope:
 - Synthetic data is generated with fixed random seeds for reproducibility.
 
 ### 2. Real Data Example
-`real_data_example.ipynb`
+`historical_data_demo.ipynb`
 
 - Applies a simple trading signal (difference between current price and its moving average) to historical market data (AAPL stock, 2021.01-2024.12).
 - Compares backtesting results for long-only and long-short approaches to execution.
